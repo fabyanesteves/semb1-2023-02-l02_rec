@@ -121,11 +121,10 @@ int main(int argc, char *argv[])
 
   while(1)
     {
-      *pGPIOC_BSRR = GPIO_BSRR_RESET(13);
-      for (i = 0; i < LED_DELAY; i++);
-      button_status = *pGPIOA_IDR & (1U << BUTTON_PIN); 
 
+      button_status = *pGPIOA_IDR & (1U << BUTTON_PIN); 
       if(button_status == 0) 
+      if(button_status == 0 && last_button_status == 1) 
       {
         *pGPIOC_BSRR = GPIO_BSRR13_SET; 
         led_status = 0;
@@ -134,12 +133,21 @@ int main(int argc, char *argv[])
       {
         *pGPIOA_BSRRC = GPIO_BSRR13_RESET; 
         led_status = 1;
-      }
-      for (uint32_t i = 0; i < LED_DELAY; i++);
+        led_status = !led_status; 
 
-      *pGPIOC_BSRR = GPIO_BSRR_SET(13);
-      for (i = 0; i < LED_DELAY; i++);
-    }
+        if(led_status == 0) 
+        {
+          *pGPIOC_BSRR = GPIO_BSRR13_SET; 
+        }
+        else 
+        {
+          *pGPIOC_BSRR = GPIO_BSRR13_RESET; 
+        }
+      }
+
+      last_button_status = button_status; 
+
+      for (uint32_t i = 0; i < LED_DELAY; i++);
 
   /* Nunca deveria chegar aqui */
 
